@@ -64,11 +64,9 @@ st.markdown("""
 class ShiftAnalytic:
     def __init__(self, api_key):
         genai.configure(api_key=api_key)
-        # Cambiamos el modelo a uno con mayor disponibilidad para evitar el error 404
-        self.model = genai.GenerativeModel('gemini-1.5-flash')
+        self.model = genai.GenerativeModel('gemini-2.5-flash')
 
     def process(self, role, prompt_text):
-        # Instrucción estricta para el idioma y la estructura de preguntas
         system_instruction = (
             f"Actúa como un Consultor Estratégico Senior experto en {role}. "
             "Tu tarea es decodificar conceptos complejos. "
@@ -89,9 +87,7 @@ class ShiftAnalytic:
 with st.sidebar:
     st.markdown("### AUTENTICACIÓN")
     user_key = st.text_input("TOKEN_DE_ACCESO", type="password", placeholder="Pega tu API Key aquí...")
-    st.divider()
-    st.markdown("### CONFIGURACIÓN")
-    perfil = st.selectbox("ROL_ESTRATÉGICO", ["Estrategia Ejecutiva", "Innovación de Producto", "Inteligencia de Mercado"])
+    
 
 st.markdown("# SPRING AI SHIFT™")
 st.markdown("`ESTADO: ACTIVO // IDIOMA: ESPAÑOL`")
@@ -100,7 +96,7 @@ col1, col2 = st.columns([1, 1.2])
 
 with col1:
     st.markdown("### [ENTRADA_DE_DATOS]")
-    tema = st.text_area("", placeholder="Describe el concepto o desafío a deconstruir...", height=300)
+    tema = st.text_area("", placeholder="Describi cuál es HOY tu desafío comercial...", height=300)
     process_trigger = st.button("EJECUTAR ANÁLISIS ESTRATÉGICO")
 
 with col2:
