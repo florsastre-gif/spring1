@@ -1,123 +1,150 @@
 import streamlit as st
 import google.generativeai as genai
-import os
-from dotenv import load_dotenv
+import time
 
-# --- CONFIGURACIÓN DE NÚCLEO ---
-load_dotenv()
-st.set_page_config(page_title="SPRING AI SHIFT", page_icon="🌱", layout="wide")
+# --- CONFIGURACIÓN DE MARCA ---
+st.set_page_config(
+    page_title="SPRING AI SHIFT", 
+    page_icon="🌱", 
+    layout="wide",
+    initial_sidebar_state="expanded"
+)
 
-# --- UI ENGINE (TECH MINIMALISM) ---
+# --- UI ARCHITECTURE (ELVATED TECH) ---
+# Implementación de capas de profundidad y suavizado de contraste
 st.markdown("""
     <style>
-    @import url('https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@300;400;700&display=swap');
+    @import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;600&family=JetBrains+Mono:wght@400&display=swap');
 
-    /* Reset Global */
-    .stApp { background-color: #050505; color: #E0E0E0; font-family: 'JetBrains Mono', monospace; }
-    [data-testid="stSidebar"] { background-color: #000000; border-right: 1px solid #1A1A1A; }
+    /* Variables de diseño Senior */
+    :root {
+        --bg-deep: #050505;
+        --bg-surface: #0F0F0F;
+        --accent: #00FFAA;
+        --border-subtle: rgba(255, 255, 255, 0.1);
+        --text-main: #E0E0E0;
+        --text-dim: #888888;
+    }
+
+    .stApp { background-color: var(--bg-deep); color: var(--text-main); font-family: 'Inter', sans-serif; }
     
-    /* Typography */
-    h1, h2, h3 { color: #FFFFFF !important; letter-spacing: -1px; font-weight: 700; }
-    .stMarkdown p { font-weight: 300; line-height: 1.6; color: #A0A0A0; }
-
-    /* Containers */
-    .tech-card {
-        background: #0A0A0A;
-        border: 1px solid #1A1A1A;
-        border-radius: 4px;
-        padding: 2rem;
-        margin-bottom: 1rem;
-        transition: border 0.3s ease;
+    /* Sidebar Profesional: Reducción de ruido visual */
+    [data-testid="stSidebar"] { 
+        background-color: var(--bg-surface); 
+        border-right: 1px solid var(--border-subtle);
     }
-    .tech-card:hover { border-color: #00FFAA; }
 
-    /* Inputs */
-    .stTextArea textarea {
+    /* Input Fields: Legibilidad garantizada y estética premium */
+    input, textarea, [data-baseweb="select"] > div {
         background-color: #000000 !important;
-        color: #00FFAA !important;
-        border: 1px solid #1A1A1A !important;
-        font-family: 'JetBrains Mono', monospace;
+        color: var(--accent) !important;
+        border: 1px solid var(--border-subtle) !important;
+        border-radius: 8px !important;
+        font-family: 'JetBrains Mono', monospace !important;
+        padding: 12px !important;
+    }
+    
+    input:focus, textarea:focus {
+        border-color: var(--accent) !important;
+        box-shadow: 0 0 10px rgba(0, 255, 170, 0.1) !important;
     }
 
-    /* Primary Action Button */
+    /* Acción Principal: Botón con jerarquía clara */
     div.stButton > button {
-        background-color: #FFFFFF !important;
+        background: linear-gradient(135deg, #00FFAA 0%, #00CC88 100%) !important;
         color: #000000 !important;
+        font-weight: 600 !important;
         border: none !important;
-        font-weight: 700 !important;
-        text-transform: uppercase;
+        border-radius: 8px !important;
+        padding: 0.75rem 2rem !important;
         width: 100%;
-        border-radius: 2px !important;
-        padding: 0.75rem 0 !important;
-        letter-spacing: 1px;
+        transition: transform 0.2s ease, box-shadow 0.2s ease;
     }
-    div.stButton > button:hover { background-color: #00FFAA !important; }
+    div.stButton > button:hover {
+        transform: translateY(-1px);
+        box-shadow: 0 4px 15px rgba(0, 255, 170, 0.3);
+    }
 
-    /* Info Boxes */
-    .stAlert { background-color: #0A0A0A !important; border: 1px solid #1A1A1A !important; color: #A0A0A0 !important; }
+    /* Cards de Salida con profundidad */
+    .intel-card {
+        background-color: var(--bg-surface);
+        border: 1px solid var(--border-subtle);
+        border-radius: 12px;
+        padding: 24px;
+        margin-top: 10px;
+    }
+
+    /* Footer Estratégico */
+    .footer-item {
+        color: var(--text-dim);
+        font-size: 0.8rem;
+        letter-spacing: 1.5px;
+        text-transform: uppercase;
+        border-top: 1px solid var(--border-subtle);
+        padding-top: 20px;
+    }
     </style>
     """, unsafe_allow_html=True)
 
-# --- LOGIC LAYER ---
-class ShiftEngine:
-    def __init__(self, api_key: str):
+# --- LOGIC LAYER (ENCAPSULADA) ---
+class ShiftAnalytic:
+    def __init__(self, api_key):
         genai.configure(api_key=api_key)
         self.model = genai.GenerativeModel('gemini-1.5-flash')
 
-    def analyze(self, role: str, text: str) -> str:
-        prompt = f"""
-        Role: Senior Expert in {role}
-        Objective: Decodify complexity into actionable intelligence.
-        Format: 
-        1. CORE CONCEPT (1 sentence)
-        2. SYSTEM ANALOGY
-        3. EXECUTION PATH (3 clear steps)
-        4. STRATEGIC QUESTION
-        
-        Input: {text}
-        """
+    def process(self, role, prompt_text):
+        full_prompt = (
+            f"You are a Senior Strategic Consultant in {role}. "
+            f"Analyze the following and provide a high-level executive summary: {prompt_text}"
+        )
         try:
-            response = self.model.generate_content(prompt)
-            return response.text
+            return self.model.generate_content(full_prompt).text
         except Exception as e:
-            return f"SYSTEM_ERROR: {str(e)}"
+            return f"PROCESS_ERROR: {str(e)}"
 
-# --- INTERFACE ---
+# --- INTERFACE DESIGN ---
 with st.sidebar:
-    st.markdown("### SYSTEM_AUTH")
-    user_key = st.text_input("API_KEY_TOKEN", type="password")
+    st.markdown("<h3 style='color:white;'>SYSTEM_AUTH</h3>", unsafe_allow_html=True)
+    user_key = st.text_input("ACCESS_TOKEN", type="password", placeholder="Paste API Key here...")
     st.divider()
-    st.markdown("### OPERATIONAL_PROFILE")
-    perfil = st.selectbox("ROLE_SELECT", ["Marketing & Business", "Product-Service", "Executive Strategy"])
+    st.markdown("<h3 style='color:white;'>OPERATIONAL_SCOPE</h3>", unsafe_allow_html=True)
+    perfil = st.selectbox("ROLE", ["Executive Strategy", "Product Innovation", "Marketing Intelligence"])
 
 st.markdown("# SPRING AI SHIFT™")
-st.markdown("`v2.0 // HIGH_CONTRAST_EDITION`")
-st.divider()
+st.markdown("<p style='color:#888;'>Bridging the gap between raw data and strategic execution.</p>", unsafe_allow_html=True)
 
-col1, col2 = st.columns([1, 1])
+col1, col2 = st.columns([1, 1.2])
 
 with col1:
-    st.markdown('<div class="tech-card">', unsafe_allow_html=True)
-    st.markdown("### INPUT_STREAM")
-    tema = st.text_area("", placeholder="Enter concept to deconstruct...", height=250)
-    process_btn = st.button("RUN_ANALYSIS")
-    st.markdown('</div>', unsafe_allow_html=True)
+    st.markdown("### [INPUT_STREAM]")
+    tema = st.text_area("", placeholder="Describe the concept or challenge to analyze...", height=300)
+    process_trigger = st.button("RUN STRATEGIC ANALYSIS")
 
 with col2:
-    if process_btn:
+    st.markdown("### [OUTPUT_INTEL]")
+    if process_trigger:
         if not user_key:
-            st.error("ERR: MISSING_API_KEY")
+            st.error("Authentication Error: API Key missing in sidebar.")
         elif not tema:
-            st.warning("ERR: EMPTY_INPUT")
+            st.warning("Input Error: Data stream is empty.")
         else:
-            engine = ShiftEngine(user_key)
-            with st.spinner("PROCESSING_DATA..."):
-                output = engine.analyze(perfil, tema)
-                st.markdown('<div class="tech-card">', unsafe_allow_html=True)
-                st.markdown("### OUTPUT_INTEL")
-                st.markdown(output)
-                st.markdown('</div>', unsafe_allow_html=True)
+            engine = ShiftAnalytic(user_key)
+            with st.spinner("Processing through strategic engine..."):
+                # Simulación de latencia para feedback visual premium
+                time.sleep(1) 
+                result = engine.process(perfil, tema)
+                st.markdown(f'<div class="intel-card">{result}</div>', unsafe_allow_html=True)
     else:
-        st.markdown('<div style="opacity: 0.3; padding: 2rem; border: 1px dashed #333;">SYSTEM_IDLE: Awaiting input stream...</div>', unsafe_allow_html=True)
+        st.markdown(
+            '<div style="height:300px; display:flex; align-items:center; justify-content:center; border:1px dashed #333; border-radius:12px; color:#555;">'
+            'Awaiting Strategic Input...'
+            '</div>', 
+            unsafe_allow_html=True
+        )
 
-
+# --- FOOTER ---
+st.markdown("<br><br>", unsafe_allow_html=True)
+f1, f2, f3 = st.columns(3)
+with f1: st.markdown('<div class="footer-item">STRATEGY / Governance</div>', unsafe_allow_html=True)
+with f2: st.markdown('<div class="footer-item">EDUCATION / Leadership</div>', unsafe_allow_html=True)
+with f3: st.markdown('<div class="footer-item">IMPACT / Purpose</div>', unsafe_allow_html=True)
